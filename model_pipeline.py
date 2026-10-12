@@ -91,3 +91,30 @@ def load_model(filename="classifier.joblib"):
     print(f"Modèle chargé depuis : {filename}")
 
     return model
+
+
+def predict(model, features):
+    """Prédit la classe pour un client.
+
+    Args:
+        model: modèle entraîné.
+        features (dict): caractéristiques du client (9 colonnes).
+
+    Returns:
+        int: classe prédite (0 = reste, 1 = quitte la banque).
+    """
+    import pandas as pd
+
+    columns = [
+        "CreditScore",
+        "Gender",
+        "Age",
+        "Tenure",
+        "Balance",
+        "NumOfProducts",
+        "HasCrCard",
+        "IsActiveMember",
+        "EstimatedSalary",
+    ]
+    frame = pd.DataFrame([features], columns=columns)
+    return int(model.predict(frame)[0])

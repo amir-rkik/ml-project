@@ -17,7 +17,7 @@ from model_pipeline import (
 DATA_PATH = "Churn_Modelling.csv"
 MODEL_PATH = "classifier.joblib"
 # On ne cible que nos fichiers (sinon le scan du venv est très long)
-FILES = ["model_pipeline.py", "main.py", "pipeline_prefect.py"]
+FILES = ["model_pipeline.py", "main.py", "pipeline_prefect.py", "app.py"]
 
 
 def run_cmd(cmd):
@@ -85,6 +85,34 @@ def task_evaluate(model, x_test, y_test):
     return accuracy
 
 
+@task(name="Récupération du projet (git)")
+def git_pull():
+    run_cmd(["git", "pull", "origin", "main"])
+
+
+@task(name="Lancement de l'API (FastAPI)")
+def start_api():
+    print("API sur http://127.0.0.1:8000/docs (Ctrl+C pour arrêter)")
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uvicorn",
+            "app:app",
+            "--host",
+            "0.0.0.0",  # nosec B104
+            "--port",
+            "8000",
+        ],
+        check=False,
+    )
+
+
+@flow(name="api")
+def api_flow():
+    start_api()
+
+
 # ---------- FLOWS ----------
 @flow(name="install")
 def install_flow():
@@ -115,6 +143,7 @@ def evaluate_flow():
 
 @flow(name="all")
 def all_flow():
+    git_pull()
     install_dependencies()
     format_code()
     check_quality()
@@ -133,6 +162,7 @@ FLOWS = {
     "evaluate": evaluate_flow,
     "code": code_flow,
     "install": install_flow,
+    "api": api_flow,
 }
 
 if __name__ == "__main__":

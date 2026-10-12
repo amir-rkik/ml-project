@@ -233,8 +233,3 @@ whenever==0.10.5
 widgetsnbextension==4.0.16
 yarl==1.25.1
 zipp==4.1.0
-bandit==1.9.4
-black==26.10.0
-flake8==7.4.1
-prefect==3.8.7
-pytest==9.1.1
